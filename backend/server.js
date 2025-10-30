@@ -8,24 +8,24 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
+
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/password-reset-app';
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// User Schema
+
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
 
-// Password Reset Token Schema
+
 const passwordResetTokenSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   token: { type: String, required: true, unique: true },
@@ -33,24 +33,21 @@ const passwordResetTokenSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Models
+
 const User = mongoose.model('User', userSchema);
 const PasswordResetToken = mongoose.model('PasswordResetToken', passwordResetTokenSchema);
 
-// Generate random token
 const generateToken = () => {
   return require('crypto').randomBytes(32).toString('hex');
 };
 
-// Routes
 
-// 1. Request Password Reset
 app.post('/api/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     console.log(`📧 Password reset requested for: ${email}`);
 
-    // Check if user exists
+ 
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ 
@@ -59,25 +56,25 @@ app.post('/api/forgot-password', async (req, res) => {
       });
     }
 
-    // Generate reset token
+
     const resetToken = generateToken();
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiry
 
-    // Save token to database
+   
     await PasswordResetToken.create({
       userId: user._id,
       token: resetToken,
       expiresAt: expiresAt
     });
 
-    // For testing - log the token (remove email auth issues)
+    
     console.log(`🔗 Reset token generated: ${resetToken}`);
     console.log(`📧 Email would be sent to: ${email}`);
 
     res.json({ 
       success: true, 
       message: 'Password reset link sent to your email.',
-      token: resetToken // Include token for testing
+      token: resetToken
     });
 
   } catch (error) {
@@ -89,7 +86,7 @@ app.post('/api/forgot-password', async (req, res) => {
   }
 });
 
-// 2. Verify Reset Token
+
 app.get('/api/verify-reset-token/:token', async (req, res) => {
   try {
     const { token } = req.params;
@@ -121,7 +118,7 @@ app.get('/api/verify-reset-token/:token', async (req, res) => {
   }
 });
 
-// 3. Reset Password
+
 app.post('/api/reset-password/:token', async (req, res) => {
   try {
     const { token } = req.params;
@@ -129,7 +126,7 @@ app.post('/api/reset-password/:token', async (req, res) => {
 
     console.log(`🔄 Resetting password with token: ${token}`);
 
-    // Find valid token
+   
     const resetToken = await PasswordResetToken.findOne({ 
       token,
       expiresAt: { $gt: new Date() }
@@ -142,15 +139,15 @@ app.post('/api/reset-password/:token', async (req, res) => {
       });
     }
 
-    // Hash new password
+ 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Update user password
+    
     await User.findByIdAndUpdate(resetToken.userId._id, { 
       password: hashedPassword 
     });
 
-    // Delete used token
+    
     await PasswordResetToken.deleteOne({ _id: resetToken._id });
 
     console.log(`✅ Password reset successful for user: ${resetToken.userId.email}`);
@@ -169,7 +166,7 @@ app.post('/api/reset-password/:token', async (req, res) => {
   }
 });
 
-// 4. Create sample user (for testing)
+
 app.post('/api/create-user', async (req, res) => {
   try {
     const { email, password } = req.body;
