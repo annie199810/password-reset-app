@@ -7,27 +7,70 @@ const ResetPasswordPage = ({ onNavigate }) => {
   const [resetSuccess, setResetSuccess] = useState(false);
   const [error, setError] = useState('');
   const [tokenValid, setTokenValid] = useState(true);
+  const [token, setToken] = useState('');
 
-  
+  // Get token from URL and verify it
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    const resetToken = urlParams.get('token');
     
-    if (!token) {
+    if (!resetToken) {
       setTokenValid(false);
       setError('Invalid or missing reset token.');
+      return;
     }
     
+    setToken(resetToken);
+    
+    // Verify the token with backend
+    const verifyToken = async () => {
+      try {
+        console.log('🔍 Verifying token:', resetToken);
+        
+        const response = await fetch(`https://password-reset-app-1-k5vy.onrender.com/api/verify-reset-token/${resetToken}`);
+        const result = await response.json();
+        
+        console.log('✅ Token verification result:', result);
+        
+        if (!result.valid) {
+          setTokenValid(false);
+          setError(result.message || 'Invalid or expired reset token.');
+        }
+      } catch (err) {
+        console.error('❌ Token verification error:', err);
+        setTokenValid(false);
+        setError('Failed to verify reset token. Please try again.');
+      }
+    };
+    
+    verifyToken();
   }, []);
 
   const handlePasswordReset = async (newPassword) => {
     try {
       setError('');
+      console.log('🔄 Resetting password for token:', token);
       
-      setTimeout(() => {
+      // ✅ FIXED: Actual API call to reset password
+      const response = await fetch(`https://password-reset-app-1-k5vy.onrender.com/api/reset-password/${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newPassword }),
+      });
+      
+      const result = await response.json();
+      console.log('📨 Reset password response:', result);
+      
+      if (result.success) {
         setResetSuccess(true);
-      }, 1000);
+        console.log('✅ Password reset successful');
+      } else {
+        setError(result.message || 'Failed to reset password.');
+      }
     } catch (err) {
+      console.error('❌ Reset password error:', err);
       setError('Failed to reset password. Please try again.');
     }
   };

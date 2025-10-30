@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ForgotPassword from '../components/ForgotPassword';
 import SuccessMessage from '../components/SuccessMessage';
-import ErrorMessage from '../components/ErrorMessage';
+//import ErrorMessage from '../components/ErrorMessage';
 
 const ForgotPasswordPage = ({ onNavigate }) => {
   const [emailSent, setEmailSent] = useState(false);
@@ -15,8 +15,8 @@ const ForgotPasswordPage = ({ onNavigate }) => {
       
       console.log('🔄 Sending password reset request for:', email);
       
-      // Call the real backend API
-      const response = await fetch('http://localhost:5000/api/forgot-password', {
+      // ✅ FIXED: Use your deployed backend URL
+      const response = await fetch('https://password-reset-app-1-k5vy.onrender.com/api/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ const ForgotPasswordPage = ({ onNavigate }) => {
       }
     } catch (err) {
       console.error('❌ Error:', err);
-      setError('Failed to send reset email. Please check if backend is running.');
+      setError('Failed to send reset email. Please try again later.');
     }
   };
 
