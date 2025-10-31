@@ -10,8 +10,14 @@ const app = express();
 
 
 app.use(cors({
-  origin: ['https://your-app-name.netlify.app', 'http://localhost:3001'],
-  credentials: true
+  origin: [
+    'https://prapp.netlify.app', 
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -83,7 +89,7 @@ app.post('/api/forgot-password', async (req, res) => {
     }
 
     const resetToken = generateToken();
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiry
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); 
 
     await PasswordResetToken.create({
       userId: user._id,
