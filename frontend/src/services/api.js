@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://password-reset-app-2-7ap2.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://password-reset-app-3.onrender.com';
 
 export const passwordResetAPI = {
   requestReset: async (email) => {
