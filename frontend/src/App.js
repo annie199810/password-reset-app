@@ -1,31 +1,22 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import HomePage from './pages/HomePage';
+import './App.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'forgot-password':
-        return <ForgotPasswordPage onNavigate={setCurrentPage} />;
-      case 'reset-password':
-        return <ResetPasswordPage onNavigate={setCurrentPage} />;
-      default:
-        return <HomePage onNavigate={setCurrentPage} />;
-    }
-  };
-
-  return (
-    <div className="App">
-      <div className="container-fluid">
-        {renderPage()}
-      </div>
-    </div>
-  );
+    return (
+        <BrowserRouter>
+            <div className="App">
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                </Routes>
+            </div>
+        </BrowserRouter>
+    );
 }
 
 export default App;

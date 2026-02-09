@@ -1,82 +1,154 @@
 import React, { useState } from 'react';
 
-const ForgotPassword = ({ onSubmit, error }) => {
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const ForgotPassword = () => {
+    const [email, setEmail] = useState('developerannie057@gmail.com');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!email) {
-      return;
-    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setMessage('');
 
-    setIsSubmitting(true);
-    await onSubmit(email);
-    setIsSubmitting(false);
-  };
+        try {
+            console.log('🔄 Sending POST request to: http://localhost:5001/api/reset-password');
+            console.log('📧 Email being sent:', email);
 
-  return (
-    <div>
-      <div className="text-center mb-4">
-        <i className="fas fa-envelope fa-3x text-primary mb-3"></i>
-        <h2>Reset Your Password</h2>
-        <p className="text-muted">
-          Enter your email address and we'll send you a link to reset your password.
-        </p>
-      </div>
+            const response = await fetch('http://localhost:5001/api/reset-password', {
+                method: 'POST', // MUST BE POST
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email })
+            });
 
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          <i className="fas fa-exclamation-triangle me-2"></i>
-          {error}
+            const data = await response.json();
+            console.log('✅ Backend response:', data);
+
+            if (data.success) {
+                setMessage('Password reset link has been sent to your email address.');
+                setEmail('');
+            } else {
+                setError(data.message || 'Failed to send reset link');
+            }
+        } catch (err) {
+            console.error('💥 Full error:', err);
+            console.error('📡 Network error details:', err.message);
+            setError('Cannot connect to server. Please make sure backend is running on port 5001.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="container-fluid vh-100" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+            <div className="row h-100 justify-content-center align-items-center">
+                <div className="col-xl-4 col-lg-5 col-md-6 col-sm-8">
+                    <div className="card border-0 shadow-lg" style={{
+                        backdropFilter: 'blur(10px)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderRadius: '20px'
+                    }}>
+                        <div className="card-body p-5">
+                            <div className="text-center mb-4">
+                                <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style={{ width: '60px', height: '60px' }}>
+                                    <i className="bi bi-shield-lock-fill text-white" style={{ fontSize: '1.5rem' }}></i>
+                                </div>
+                                <h2 className="fw-bold text-dark mb-2">Reset Your Password</h2>
+                                <p className="text-muted">Enter your email to receive a reset link</p>
+                            </div>
+
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-4">
+                                    <label htmlFor="email" className="form-label fw-semibold text-dark">
+                                        <i className="bi bi-envelope-fill text-primary me-2"></i>
+                                        Email Address
+                                    </label>
+                                    <div className="input-group">
+                                        <span className="input-group-text bg-light border-end-0">
+                                            <i className="bi bi-at text-muted"></i>
+                                        </span>
+                                        <input
+                                            type="email"
+                                            className="form-control border-start-0 ps-0"
+                                            id="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            placeholder="name@company.com"
+                                            style={{ borderLeft: 'none' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {error && (
+                                    <div className="alert alert-danger d-flex align-items-center border-0 shadow-sm">
+                                        <i className="bi bi-exclamation-octagon-fill me-3 fs-5"></i>
+                                        <div className="fw-medium">{error}</div>
+                                    </div>
+                                )}
+
+                                {message && (
+                                    <div className="alert alert-success d-flex align-items-center border-0 shadow-sm">
+                                        <i className="bi bi-check-circle-fill me-3 fs-5"></i>
+                                        <div className="fw-medium">{message}</div>
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="btn btn-primary w-100 py-3 fw-semibold shadow"
+                                    style={{
+                                        borderRadius: '12px',
+                                        fontSize: '1.1rem',
+                                        background: 'linear-gradient(45deg, #667eea, #764ba2)',
+                                        border: 'none'
+                                    }}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2"></span>
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-send-check-fill me-2"></i>
+                                            Send Reset Link
+                                        </>
+                                    )}
+                                </button>
+
+                                <div className="text-center mt-4">
+                                    <a href="/" className="text-decoration-none text-muted">
+                                        <i className="bi bi-arrow-left me-2"></i>
+                                        Back to Login
+                                    </a>
+                                </div>
+                            </form>
+
+                            <div className="text-center mt-4 pt-3 border-top">
+                                <small className="text-muted">
+                                    <i className="bi bi-info-circle me-1"></i>
+                                    You will receive a link to reset your password
+                                </small>
+                            </div>
+
+                            <div className="mt-3 p-3 bg-light rounded">
+                                <small className="text-muted">
+                                    <strong>Demo Info:</strong> Using email: developerannie057@gmail.com<br/>
+                                    <strong>Backend:</strong> http://localhost:5001
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">
-            <i className="fas fa-envelope me-2"></i>
-            Email Address
-          </label>
-          <input
-            type="email"
-            className="form-control form-control-lg"
-            id="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary btn-lg w-100"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-              Sending...
-            </>
-          ) : (
-            <>
-              <i className="fas fa-paper-plane me-2"></i>
-              Send Reset Link
-            </>
-          )}
-        </button>
-      </form>
-
-      <div className="mt-4 p-3 bg-light rounded">
-        <small className="text-muted">
-          <i className="fas fa-info-circle me-1"></i>
-          You'll receive an email with a password reset link that expires in 1 hour.
-        </small>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ForgotPassword;
